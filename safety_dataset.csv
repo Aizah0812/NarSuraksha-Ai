@@ -1,0 +1,61 @@
+message,label
+I am going to college,safe
+I reached home safely,safe
+I am studying in library,safe
+I am with my friends,safe
+I am at home,safe
+I am in class,safe
+I am travelling with my family,safe
+I am going to market,safe
+Everything is fine,safe
+I reached hostel safely,safe
+I am in a crowded place,safe
+My brother is coming to pick me,safe
+I am travelling with my friend,safe
+I am waiting near the main gate,safe
+I am inside the campus,safe
+I am attending my lecture,safe
+I am coming back with my group,safe
+I am in a safe area,safe
+I booked a cab and shared the details,safe
+I am with my classmates,safe
+This place is dark and empty,warning
+I am alone and feeling nervous,warning
+A stranger is asking personal questions,warning
+A man is staring at me continuously,warning
+I think someone is watching me,warning
+I am uncomfortable here,warning
+This area looks unsafe,warning
+There are no people around me,warning
+My friend is not picking my call,warning
+I cannot find my way,warning
+My phone battery is low and I am alone,warning
+The road is empty and I feel scared,warning
+Someone is walking behind me for a long time,warning
+The cab route looks different,warning
+I am waiting alone at night,warning
+The driver is asking unnecessary questions,warning
+A group of strangers is standing near me,warning
+The street lights are not working,warning
+I feel unsafe in this location,warning
+I am nervous because the place is isolated,warning
+Someone is following me,danger
+I feel someone is chasing me,danger
+I am being harassed,danger
+Someone is troubling me,danger
+I need urgent help,danger
+Please call me immediately,danger
+I am scared,danger
+I need help,danger
+My cab driver is taking a different route,danger
+Someone is forcing me to come with him,danger
+I am stuck in an unknown place,danger
+A stranger is following my vehicle,danger
+I feel threatened,danger
+Someone is trying to grab my hand,danger
+I am in danger please help,danger
+A person is not letting me leave,danger
+I am being followed by a stranger,danger
+Someone is trying to force me into a vehicle,danger
+I am locked in a place and need help,danger
+Please send help I am unsafe,danger
