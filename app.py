@@ -10,6 +10,11 @@ import pandas as pd
 import html
 
 try:
+    from streamlit_geolocation import streamlit_geolocation
+except ImportError:
+    streamlit_geolocation = None
+
+try:
     from streamlit_js_eval import get_geolocation
 except ImportError:
     get_geolocation = None
@@ -22,7 +27,7 @@ CONTACTS_FILE = "contacts.json"
 LOG_FILE = "incident_logs.csv"
 
 st.set_page_config(
-    page_title="NariSuraksha | Women Safety System",
+    page_title="NariSuraksha | Enterprise Safety",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -591,6 +596,13 @@ def render_contact_card(contact, message):
     )
 
 
+def update_location_link(lat, lon):
+    """Save GPS location and refresh the WhatsApp alert message."""
+    st.session_state.location_link = f"https://www.google.com/maps?q={lat},{lon}"
+    st.session_state.location_status = "Live location captured successfully. The WhatsApp alert message has been updated."
+    st.session_state.alert_message = build_default_message()
+
+
 def location_box():
     st.markdown(
         """
@@ -599,34 +611,51 @@ def location_box():
             <div class="hub-icon">📍</div>
             <div>
               <h3>Location Access</h3>
-              <p>Use live GPS or enter a manual landmark to create a shareable map link.</p>
+              <p>Use live GPS or enter a manual landmark to add a Google Maps link to your emergency alert.</p>
             </div>
           </div>
         """,
         unsafe_allow_html=True,
     )
 
-    if get_geolocation:
-        st.caption("Click the button below and allow location permission in your browser.")
-        if st.button("📍 Allow / Refresh Location", key="location_btn"):
-            loc = get_geolocation()
+    st.caption("For live GPS, click the location button below and allow location permission in your browser.")
 
-            try:
-                lat = loc["coords"]["latitude"]
-                lon = loc["coords"]["longitude"]
-                st.session_state.location_link = f"https://www.google.com/maps?q={lat},{lon}"
-                st.session_state.location_status = "Location captured successfully."
-                st.session_state.alert_message = build_default_message()
-                st.rerun()
-            except Exception:
-                st.session_state.location_status = (
-                    "Location permission was denied or not available. Please enter a manual landmark."
-                )
+    gps_found = False
+
+    # Preferred option for deployed Streamlit apps
+    if streamlit_geolocation:
+        geo = streamlit_geolocation()
+
+        if geo and geo.get("latitude") is not None and geo.get("longitude") is not None:
+            update_location_link(geo.get("latitude"), geo.get("longitude"))
+            gps_found = True
+        elif geo and geo.get("error"):
+            st.session_state.location_status = (
+                "Browser location could not be captured. Please check site permission or use the manual landmark field."
+            )
+
+    # Fallback option if streamlit-geolocation is not installed
+    elif get_geolocation:
+        geo = get_geolocation()
+
+        if geo and "coords" in geo:
+            lat = geo["coords"].get("latitude")
+            lon = geo["coords"].get("longitude")
+            if lat is not None and lon is not None:
+                update_location_link(lat, lon)
+                gps_found = True
+        elif geo and "error" in geo:
+            error_msg = geo["error"].get("message", "Location permission was denied or unavailable.")
+            st.session_state.location_status = f"Browser location error: {error_msg}. You can still use manual location."
+
     else:
         st.warning(
-            "Auto location is not available because streamlit-js-eval is not installed. "
-            "Run: pip install streamlit-js-eval"
+            "Auto location is not available because the location package is not installed. "
+            "Add streamlit-geolocation to requirements.txt."
         )
+
+    if st.button("🔄 Refresh Location Status", key="refresh_location_status"):
+        st.rerun()
 
     manual_location = st.text_input(
         "Manual Location / Landmark",
@@ -639,10 +668,14 @@ def location_box():
             "https://www.google.com/maps/search/?api=1&query="
             + urllib.parse.quote(manual_location.strip())
         )
+        st.session_state.location_status = "Manual location added. The WhatsApp alert message has been updated."
         st.session_state.alert_message = build_default_message()
 
     if st.session_state.get("location_status"):
-        st.info(st.session_state.location_status)
+        if gps_found or st.session_state.get("location_link"):
+            st.success(st.session_state.location_status)
+        else:
+            st.info(st.session_state.location_status)
 
     if st.session_state.get("location_link"):
         safe_link = html.escape(st.session_state.location_link)
@@ -656,7 +689,6 @@ def location_box():
         )
 
     st.markdown("</div>", unsafe_allow_html=True)
-
 
 def fake_call_ui():
     st.markdown(
